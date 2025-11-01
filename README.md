@@ -1,5 +1,10 @@
 # Windows-Server-2022-Windows-10-Setup
 
+<p align="right">
+  <img alt="Language" src="https://img.shields.io/badge/Language-English-blue">&nbsp;
+  <a href="./PANDUAN-BM.md"><img alt="Language" src="https://img.shields.io/badge/Language-Bahasa%20Melayu-orange"></a>
+</p>
+
 This guide provides step-by-step instructions for setting up a lab environment using Windows Server 2022 as a domain controller and Windows 10 as a client. The configuration is based on a set of technical specifications commonly used in training and educational settings.
 
 **Disclaimer:** This configuration, especially the simplified password policy, is designed **STRICTLY FOR CONTROLLED LAB ENVIRONMENTS ONLY**. Do not use these settings in a production environment as they are insecure.
