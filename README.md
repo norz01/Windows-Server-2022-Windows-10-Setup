@@ -1,111 +1,111 @@
 # Windows-Server-2022-Windows-10-Setup
 
-Panduan ini menyediakan arahan langkah demi langkah untuk menyediakan persekitaran makmal menggunakan Windows Server 2022 sebagai pelayan domain dan Windows 10 sebagai klien. Konfigurasi ini adalah berdasarkan satu set spesifikasi teknikal yang lazim digunakan dalam latihan dan pembelajaran.
+This guide provides step-by-step instructions for setting up a lab environment using Windows Server 2022 as a domain controller and Windows 10 as a client. The configuration is based on a set of technical specifications commonly used in training and educational settings.
 
-**Penafian:** Konfigurasi ini, terutamanya dasar kata laluan yang dipermudahkan, direka **KHAS UNTUK PERSEKITARAN MAKMAL TERKAWAL SAHAJA**. Jangan gunakan tetapan ini dalam persekitaran produksi kerana ia tidak selamat.
+**Disclaimer:** This configuration, especially the simplified password policy, is designed **STRICTLY FOR CONTROLLED LAB ENVIRONMENTS ONLY**. Do not use these settings in a production environment as they are insecure.
 
-**Nota Penting:** Dalam keseluruhan panduan ini, gantikan `SN` dengan nombor stesen anda.
+**Important Note:** Throughout this guide, replace `SN` with your station number.
 
-## Senarai Kandungan
-1.  [Pra-syarat](#pra-syarat)
-2.  [Bahagian 1: Penyediaan Persekitaran Maya](#bahagian-1-penyediaan-persekitaran-maya)
-3.  [Bahagian 2: Konfigurasi Windows Server 2022](#bahagian-2-konfigurasi-windows-server-2022)
-    *   [2.1 Pemasangan & Konfigurasi Asas Pelayan](#21-pemasangan--konfigurasi-asas-pelayan)
-    *   [2.2 Pemasangan Active Directory Domain Services (AD DS)](#22-pemasangan-active-directory-domain-services-ad-ds)
-    *   [2.3 Mengubah Dasar Kata Laluan Domain (Langkah Kritikal)](#23-mengubah-dasar-kata-laluan-domain-langkah-kritikal)
-    *   [2.4 Mencipta Pengguna & Kumpulan Active Directory](#24-mencipta-pengguna--kumpulan-active-directory)
-    *   [2.5 Konfigurasi Pelayan DHCP](#25-konfigurasi-pelayan-dhcp)
-    *   [2.6 Konfigurasi Pelayan DNS](#26-konfigurasi-pelayan-dns)
-    *   [2.7 Konfigurasi Pelayan FTP](#27-konfigurasi-pelayan-ftp)
-4.  [Bahagian 3: Konfigurasi Klien Windows 10](#bahagian-3-konfigurasi-klien-windows-10)
-5.  [Bahagian 4: Pengujian & Pengesahan](#bahagian-4-pengujian--pengesahan)
+## Table of Contents
+1.  [Prerequisites](#prerequisites)
+2.  [Part 1: Virtual Environment Setup](#part-1-virtual-environment-setup)
+3.  [Part 2: Windows Server 2022 Configuration](#part-2-windows-server-2022-configuration)
+    *   [2.1 Server Installation & Basic Configuration](#21-server-installation--basic-configuration)
+    *   [2.2 Active Directory Domain Services (AD DS) Installation](#22-active-directory-domain-services-ad-ds-installation)
+    *   [2.3 Changing the Domain Password Policy (Critical Step)](#23-changing-the-domain-password-policy-critical-step)
+    *   [2.4 Creating Active Directory Users & Groups](#24-creating-active-directory-users--groups)
+    *   [2.5 DHCP Server Configuration](#25-dhcp-server-configuration)
+    *   [2.6 DNS Server Configuration](#26-dns-server-configuration)
+    *   [2.7 FTP Server Configuration](#27-ftp-server-configuration)
+4.  [Part 3: Windows 10 Client Configuration](#part-3-windows-10-client-configuration)
+5.  [Part 4: Testing & Verification](#part-4-testing--verification)
 
 ---
 
-### Pra-syarat
+### Prerequisites
 
-Sebelum bermula, pastikan anda mempunyai:
-*   Sebuah PC Hos (cth: Windows 11) yang mampu menjalankan mesin maya.
-*   Perisian virtualisasi seperti VMware Workstation, VirtualBox, atau Hyper-V.
-*   Fail imej ISO untuk Windows Server 2022.
-*   Fail imej ISO untuk Windows 10.
+Before you begin, ensure you have:
+*   A Host PC (e.g., Windows 11) capable of running virtual machines.
+*   Virtualization software such as VMware Workstation, VirtualBox, or Hyper-V.
+*   A Windows Server 2022 ISO image file.
+*   A Windows 10 ISO image file.
 
-### Bahagian 1: Penyediaan Persekitaran Maya
+### Part 1: Virtual Environment Setup
 
-1.  **Cipta Rangkaian Maya:**
-    *   Dalam perisian virtualisasi anda, cipta satu suis maya (*virtual switch*) baru.
-    *   Tetapkan jenis rangkaian kepada **Host-Only** atau **Private Network**. Ini akan mengasingkan komunikasi antara pelayan dan klien daripada rangkaian luar, mewujudkan persekitaran makmal yang selamat.
-    *   Pastikan pelayan DHCP terbina dalam perisian virtualisasi untuk rangkaian ini **dimatikan**, kerana kita akan mengkonfigurasinya pada Windows Server.
+1.  **Create a Virtual Network:**
+    *   In your virtualization software, create a new virtual switch.
+    *   Set the network type to **Host-Only** or **Private Network**. This will isolate communication between the server and client from external networks, creating a secure lab environment.
+    *   Ensure the built-in DHCP server for this network in your virtualization software is **disabled**, as we will configure it on our Windows Server.
 
-### Bahagian 2: Konfigurasi Windows Server 2022
+### Part 2: Windows Server 2022 Configuration
 
-#### 2.1 Pemasangan & Konfigurasi Asas Pelayan
+#### 2.1 Server Installation & Basic Configuration
 
-1.  **Cipta Mesin Maya Pelayan:**
-    *   Cipta mesin maya baru menggunakan imej ISO Windows Server 2022.
-    *   Sambungkan mesin maya ini ke rangkaian maya yang telah anda cipta tadi.
-    *   Selesaikan proses pemasangan Windows Server.
+1.  **Create the Server Virtual Machine:**
+    *   Create a new virtual machine using the Windows Server 2022 ISO image.
+    *   Connect this VM to the virtual network you created earlier.
+    *   Complete the Windows Server installation process.
 
-2.  **Tetapan Awal Pelayan:**
-    *   **Tukar Nama Komputer:**
-        *   Buka PowerShell sebagai Administrator dan taip:
+2.  **Initial Server Settings:**
+    *   **Rename the Computer:**
+        *   Open PowerShell as an Administrator and type:
           ```powershell
           Rename-Computer -NewName "WINsrvSN" -Restart
           ```
-    *   **Tetapkan Alamat IP Statik:**
-        *   Pergi ke `Control Panel` > `Network and Sharing Center` > `Change adapter settings`.
-        *   Klik kanan pada adapter rangkaian anda dan pilih `Properties`.
-        *   Pilih `Internet Protocol Version 4 (TCP/IPv4)` dan klik `Properties`.
-        *   Masukkan tetapan berikut:
+    *   **Set a Static IP Address:**
+        *   Go to `Control Panel` > `Network and Sharing Center` > `Change adapter settings`.
+        *   Right-click your network adapter and select `Properties`.
+        *   Select `Internet Protocol Version 4 (TCP/IPv4)` and click `Properties`.
+        *   Enter the following settings:
             *   **IP address:** `192.168.SN.100`
             *   **Subnet mask:** `255.255.255.0`
-            *   **Preferred DNS server:** `192.168.SN.100` (menunjuk kepada diri sendiri)
+            *   **Preferred DNS server:** `192.168.SN.100` (pointing to itself)
 
-#### 2.2 Pemasangan Active Directory Domain Services (AD DS)
+#### 2.2 Active Directory Domain Services (AD DS) Installation
 
-1.  **Pasang Peranan:**
-    *   Buka **Server Manager**, klik `Manage` > `Add Roles and Features`.
-    *   Ikuti wizard sehingga ke `Server Roles`, dan pilih `Active Directory Domain Services`.
-    *   Terima ciri-ciri tambahan yang dicadangkan dan selesaikan pemasangan.
+1.  **Install the Role:**
+    *   Open **Server Manager**, click `Manage` > `Add Roles and Features`.
+    *   Follow the wizard until you reach `Server Roles`, and select `Active Directory Domain Services`.
+    *   Accept the suggested additional features and complete the installation.
 
-2.  **Promosikan sebagai Domain Controller:**
-    *   Setelah pemasangan selesai, klik pada ikon notifikasi (bendera) di Server Manager dan pilih `Promote this server to a domain controller`.
-    *   Pilih `Add a new forest`.
+2.  **Promote to a Domain Controller:**
+    *   Once the installation is finished, click the notification flag icon in Server Manager and select `Promote this server to a domain controller`.
+    *   Select `Add a new forest`.
     *   **Root domain name:** `test1.com`
-    *   Tetapkan kata laluan **Directory Services Restore Mode (DSRM)** kepada `lkmb123`.
-    *   Teruskan dengan pilihan lalai sehingga pemasangan bermula. Pelayan akan dimulakan semula secara automatik.
+    *   Set the **Directory Services Restore Mode (DSRM)** password to `lkmb123`.
+    *   Proceed with the default options until the installation begins. The server will restart automatically.
 
-#### 2.3 Mengubah Dasar Kata Laluan Domain (Langkah Kritikal)
+#### 2.3 Changing the Domain Password Policy (Critical Step)
 
-Secara lalai, Windows Server menguatkuasakan kata laluan yang kompleks. Kita perlu melumpuhkan tetapan ini untuk menggunakan kata laluan mudah seperti `1234`.
+By default, Windows Server enforces complex passwords. We need to disable this to use simple passwords like `1234`.
 
-1.  **Buka Group Policy Management:**
-    *   Di **Server Manager**, pergi ke `Tools` > `Group Policy Management`.
+1.  **Open Group Policy Management:**
+    *   In **Server Manager**, go to `Tools` > `Group Policy Management`.
 
-2.  **Edit Default Domain Policy:**
-    *   Kembangkan `Forest: test1.com` > `Domains` > `test1.com`.
-    *   Klik kanan pada **Default Domain Policy** dan pilih `Edit...`.
+2.  **Edit the Default Domain Policy:**
+    *   Expand `Forest: test1.com` > `Domains` > `test1.com`.
+    *   Right-click on **Default Domain Policy** and select `Edit...`.
 
-3.  **Lumpuhkan Keperluan Kerumitan:**
-    *   Navigasi ke: `Computer Configuration` > `Policies` > `Windows Settings` > `Security Settings` > `Account Policies` > `Password Policy`.
-    *   Di panel kanan, klik dua kali pada `Password must meet complexity requirements`.
-    *   Pilih **Disabled** dan klik `OK`.
-    *   (Pilihan) Klik dua kali `Minimum password length` dan tetapkan kepada `0` jika perlu.
+3.  **Disable Complexity Requirements:**
+    *   Navigate to: `Computer Configuration` > `Policies` > `Windows Settings` > `Security Settings` > `Account Policies` > `Password Policy`.
+    *   In the right pane, double-click `Password must meet complexity requirements`.
+    *   Select **Disabled** and click `OK`.
+    *   (Optional) Double-click `Minimum password length` and set it to `0` if needed.
 
-4.  **Kuatkuasakan Polisi:**
-    *   Buka **Command Prompt** atau **PowerShell** sebagai Administrator dan laksanakan arahan berikut untuk mengemas kini polisi dengan serta-merta:
+4.  **Enforce the Policy:**
+    *   Open **Command Prompt** or **PowerShell** as an Administrator and run the following command to update the policy immediately:
       ```cmd
       gpupdate /force
       ```
 
-#### 2.4 Mencipta Pengguna & Kumpulan Active Directory
+#### 2.4 Creating Active Directory Users & Groups
 
-1.  Buka **Active Directory Users and Computers** dari `Tools` di Server Manager.
-2.  Kembangkan domain `test1.com`.
-3.  Cipta kumpulan (*group*) baru jika perlu (cth: `ftp`) dengan klik kanan pada `Users` > `New` > `Group`.
-4.  Cipta akaun pengguna berikut dengan klik kanan pada `Users` > `New` > `User`. Pastikan untuk menambah mereka ke kumpulan yang betul.
+1.  Open **Active Directory Users and Computers** from the `Tools` menu in Server Manager.
+2.  Expand the `test1.com` domain.
+3.  Create new groups if needed (e.g., `ftp`) by right-clicking `Users` > `New` > `Group`.
+4.  Create the following user accounts by right-clicking `Users` > `New` > `User`. Be sure to add them to the correct groups.
 
-| Akaun | Kata Laluan | Kumpulan |
+| Account | Password | Group Membership |
 | :--- | :--- | :--- |
 | LocalAdmin | `skmtest1` | Administrators |
 | Manager | `1234` | Administrators |
@@ -115,81 +115,81 @@ Secara lalai, Windows Server menguatkuasakan kata laluan yang kompleks. Kita per
 | User10 | `1234` | Domain Users |
 | Webadmin | `123test1` | ftp |
 
-#### 2.5 Konfigurasi Pelayan DHCP
+#### 2.5 DHCP Server Configuration
 
-1.  **Pasang Peranan DHCP:**
-    *   Gunakan `Add Roles and Features` di Server Manager untuk memasang peranan `DHCP Server`.
-2.  **Konfigurasi Skop:**
-    *   Selesaikan konfigurasi pasca-pemasangan DHCP melalui notifikasi di Server Manager.
-    *   Buka `DHCP` dari menu `Tools`.
-    *   Klik kanan pada `IPv4` dan pilih `New Scope...`.
+1.  **Install the DHCP Role:**
+    *   Use `Add Roles and Features` in Server Manager to install the `DHCP Server` role.
+2.  **Configure a Scope:**
+    *   Complete the post-installation DHCP configuration via the notification in Server Manager.
+    *   Open `DHCP` from the `Tools` menu.
+    *   Right-click `IPv4` and select `New Scope...`.
     *   **Scope Name:** `LAN`
-    *   **IP Address Range:** `192.168.SN.110` hingga `192.168.SN.130`
+    *   **IP Address Range:** `192.168.SN.110` to `192.168.SN.130`
     *   **Subnet Mask:** `255.255.255.0`
-    *   **Router (Default Gateway):** Biarkan kosong.
-    *   **DNS Servers:** Pastikan ia ditetapkan kepada `192.168.SN.100`.
-    *   Aktifkan skop tersebut apabila wizard selesai.
+    *   **Router (Default Gateway):** Leave blank.
+    *   **DNS Servers:** Ensure it's set to `192.168.SN.100`.
+    *   Activate the scope when the wizard finishes.
 
-#### 2.6 Konfigurasi Pelayan DNS
+#### 2.6 DNS Server Configuration
 
-Peranan ini dipasang secara automatik bersama AD DS. Sahkan konfigurasinya:
-1.  Buka `DNS` dari menu `Tools`.
-2.  Kembangkan `Forward Lookup Zones` > `test1.com`.
-3.  Pastikan terdapat rekod hos (A) untuk `WINsrvSN` yang menunjuk ke `192.168.SN.100`.
+This role is installed automatically with AD DS. Verify its configuration:
+1.  Open `DNS` from the `Tools` menu.
+2.  Expand `Forward Lookup Zones` > `test1.com`.
+3.  Ensure a Host (A) record exists for `WINsrvSN` pointing to `192.168.SN.100`.
 
-#### 2.7 Konfigurasi Pelayan FTP
+#### 2.7 FTP Server Configuration
 
-1.  **Pasang Peranan IIS & FTP:**
-    *   Gunakan `Add Roles and Features` untuk memasang peranan `Web Server (IIS)`.
-    *   Dalam `Role Services`, pastikan anda memilih `FTP Server` dan `FTP Service`.
+1.  **Install IIS & FTP Role:**
+    *   Use `Add Roles and Features` to install the `Web Server (IIS)` role.
+    *   Under `Role Services`, ensure you select `FTP Server` and `FTP Service`.
 
-2.  **Sediakan Tapak FTP:**
-    *   Cipta folder `C:\ftp_test1`.
-    *   Buka `Internet Information Services (IIS) Manager` dari `Tools`.
-    *   Klik kanan pada `Sites` > `Add FTP Site...`.
+2.  **Set up the FTP Site:**
+    *   Create a folder `C:\ftp_test1`.
+    *   Open `Internet Information Services (IIS) Manager` from `Tools`.
+    *   Right-click `Sites` > `Add FTP Site...`.
     *   **FTP site name:** `ftp test1`
     *   **Physical path:** `C:\ftp_test1`
-    *   **Binding:** Tetapkan kepada IP Address `192.168.SN.100` pada Port `21`.
-    *   **SSL:** Pilih `No SSL`.
+    *   **Binding:** Set the IP Address to `192.168.SN.100` on Port `21`.
+    *   **SSL:** Select `No SSL`.
     *   **Authentication:** `Basic`
-    *   **Authorization:** `Specified users`, masukkan `webadmin`.
-    *   **Permissions:** `Read` dan `Write`.
-    *   Klik `Finish`.
+    *   **Authorization:** `Specified users`, enter `webadmin`.
+    *   **Permissions:** `Read` and `Write`.
+    *   Click `Finish`.
 
-### Bahagian 3: Konfigurasi Klien Windows 10
+### Part 3: Windows 10 Client Configuration
 
-1.  **Cipta Mesin Maya Klien:**
-    *   Cipta mesin maya baru menggunakan imej ISO Windows 10.
-    *   Sambungkan mesin maya ini ke rangkaian maya yang sama dengan pelayan.
-    *   Pastikan tetapan rangkaiannya ditetapkan untuk **mendapatkan alamat IP secara automatik (DHCP)**.
+1.  **Create the Client Virtual Machine:**
+    *   Create a new virtual machine using the Windows 10 ISO image.
+    *   Connect this VM to the same virtual network as the server.
+    *   Ensure its network settings are configured to **obtain an IP address automatically (DHCP)**.
 
-2.  **Tukar Nama Komputer & Sertai Domain:**
-    *   Setelah Windows 10 dipasang, buka `Settings` > `System` > `About`.
-    *   Klik `Rename this PC (advanced)`.
-    *   Di bawah tab `Computer Name`, klik `Change...`.
+2.  **Rename Computer & Join the Domain:**
+    *   Once Windows 10 is installed, open `Settings` > `System` > `About`.
+    *   Click `Rename this PC (advanced)`.
+    *   Under the `Computer Name` tab, click `Change...`.
     *   **Computer name:** `hostSN`
-    *   **Member of:** Pilih `Domain` dan taip `test1.com`.
-    *   Klik `OK`. Masukkan kredensial akaun domain yang mempunyai kebenaran (cth., `test1\Manager` dan kata laluan `1234`).
-    *   Mulakan semula PC apabila diminta.
+    *   **Member of:** Select `Domain` and type `test1.com`.
+    *   Click `OK`. Enter the credentials of a domain account with privileges (e.g., `test1\Manager` with password `1234`).
+    *   Restart the PC when prompted.
 
-### Bahagian 4: Pengujian & Pengesahan
+### Part 4: Testing & Verification
 
-1.  **Ujian Log Masuk Domain:**
-    *   Pada skrin log masuk Windows 10, log masuk menggunakan salah satu akaun pengguna domain. Contohnya:
+1.  **Domain Logon Test:**
+    *   At the Windows 10 login screen, log in using a domain user account. For example:
         *   **Username:** `test1\User1`
         *   **Password:** `1234`
 
-2.  **Ujian DHCP & DNS:**
-    *   Buka **Command Prompt** pada Windows 10.
-    *   Taip `ipconfig /all`. Sahkan klien mendapat alamat IP dalam julat `192.168.SN.110` - `192.168.SN.130` dan DNS Server ialah `192.168.SN.100`.
-    *   Taip `ping WINsrvSN`. Anda sepatutnya menerima balasan dari `192.168.SN.100`.
+2.  **DHCP & DNS Test:**
+    *   Open **Command Prompt** on the Windows 10 client.
+    *   Type `ipconfig /all`. Verify the client received an IP in the `192.168.SN.110` - `192.168.SN.130` range and the DNS Server is `192.168.SN.100`.
+    *   Type `ping WINsrvSN`. You should get a reply from `192.168.SN.100`.
 
-3.  **Ujian Akses FTP:**
-    *   Buka **File Explorer** pada Windows 10.
-    *   Di bar alamat, taip `ftp://192.168.SN.100` dan tekan Enter.
-    *   Apabila digesa, log masuk sebagai:
+3.  **FTP Access Test:**
+    *   Open **File Explorer** on the Windows 10 client.
+    *   In the address bar, type `ftp://192.168.SN.100` and press Enter.
+    *   When prompted, log in as:
         *   **Username:** `webadmin`
         *   **Password:** `123test1`
-    *   Sahkan anda boleh melihat kandungan folder dan cuba cipta fail baru untuk menguji kebenaran menulis (*write permission*).
+    *   Confirm you can see the folder's contents and try creating a new file to test write permissions.
 
-Jika semua ujian di atas berjaya, persekitaran makmal anda telah berjaya dikonfigurasikan
+If all the above tests are successful, your lab environment has been configured correctly.
