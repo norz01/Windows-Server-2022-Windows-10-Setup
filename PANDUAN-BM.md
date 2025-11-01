@@ -1,6 +1,9 @@
 # Panduan Konfigurasi Windows Server 2022 & Windows 10
 
-<p align="right"><a href="./README.md">English</a> | Bahasa Melayu</p>
+<p align="right">
+  <a href="./README.md"><img alt="Language" src="https://img.shields.io/badge/Language-English-blue"></a>&nbsp;
+  <img alt="Language" src="https://img.shields.io/badge/Language-Bahasa%20Melayu-orange">
+</p>
 
 Panduan ini menyediakan arahan langkah demi langkah untuk menyediakan persekitaran makmal menggunakan Windows Server 2022 sebagai pelayan domain dan Windows 10 sebagai klien. Konfigurasi ini adalah berdasarkan satu set spesifikasi teknikal yang lazim digunakan dalam latihan dan pembelajaran.
 
